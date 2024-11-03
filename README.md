@@ -19,7 +19,7 @@
 
    ```bash
    mkdir -p ~/.irssi/scripts
-   wget -O ~/.irssi/scripts/ntfy.pl https://github.com/ronilaukkarinen/irssi-ntfy/ntfy.pl
+   wget -O ~/.irssi/scripts/ntfy.pl https://raw.githubusercontent.com/ronilaukkarinen/irssi-ntfy/refs/heads/master/ntfy.pl
    ```
 
 2. **Load the script** in Irssi:
