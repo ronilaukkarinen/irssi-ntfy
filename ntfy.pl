@@ -5,12 +5,12 @@ use Irssi::Irc;
 
 use vars qw($VERSION %IRSSI);
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 %IRSSI = (
     authors     => 'Roni Laukkarinen',
     contact     => 'roni@dude.fi',
     name        => 'ntfy',
-    description => 'Send notifications via ntfy when mentioned or receiving a private message.',
+    description => 'Send notifications via ntfy when mentioned or receiving a private message, using built-in Irssi highlights.',
     license     => 'GPLv2',
 );
 
@@ -18,7 +18,6 @@ $VERSION = '1.3';
 my $ntfy_title = 'Irssi Notification';
 
 # Register configuration setting
-# Set the full URL for the ntfy endpoint, including http:// or https://
 Irssi::settings_add_str('ntfy', 'ntfy_endpoint', 'https://ntfy.sh/irssi');
 
 # Function to send the notification
@@ -32,11 +31,16 @@ sub send_ntfy_notification {
     system('curl', '-d', $message, $ntfy_endpoint);
 }
 
-# Handle messages where you are highlighted
+# Handle highlighted messages using Irssi's built-in highlight functionality
 sub highlight_notify {
-    my ($server, $msg, $nick, $address, $target) = @_;
-    my $message = "Mentioned by $nick in $target: $msg";
-    send_ntfy_notification($ntfy_title, $message);
+    my ($dest, $text, $stripped) = @_;
+
+    # Check if the message is highlighted
+    if ($dest->{level} & (MSGLEVEL_HILIGHT | MSGLEVEL_MSGS)) {
+        my $target = $dest->{target}; # Channel or person
+        my $message = "Highlight in $target: $stripped";
+        send_ntfy_notification($ntfy_title, $message);
+    }
 }
 
 # Handle private messages
@@ -47,7 +51,7 @@ sub private_message_notify {
 }
 
 # Attach handlers to Irssi signals
-Irssi::signal_add('message irc action', 'highlight_notify');
+Irssi::signal_add('print text', 'highlight_notify');
 Irssi::signal_add('message private', 'private_message_notify');
 
 Irssi::print("ntfy script loaded. Example usage: /set ntfy_endpoint https://your-custom-ntfy-server/irssi");
